@@ -2,8 +2,10 @@
 -- +goose StatementBegin
 SELECT 'up SQL query';
 CREATE TABLE main_list (
-    list_id INT FOREIGN KEY REFERENCES list_item.id,
-    user_id INT FOREIGN KEY REFERENCES user.id
+    list_id INT,
+    user_id INT,
+    FOREIGN KEY (list_id) REFERENCES list_item(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 )
 -- +goose StatementEnd
 

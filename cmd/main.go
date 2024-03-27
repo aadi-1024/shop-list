@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"shoplist/pkg/memstore"
+	"shoplist/pkg/postgres"
 
 	"github.com/labstack/echo/v4"
 )
@@ -10,9 +10,14 @@ import (
 var App Config
 
 func main() {
-	App.DataStore = memstore.NewMemStore()
+	db, err := postgres.NewDb("postgres://postgres:password@localhost:5432/list")
+	if err != nil {
+		log.Fatal(err)
+	}
+	App.DataStore = db
 	e := echo.New()
 	e.Debug = true
+	e.HideBanner = true
 	SetupRouter(e)
 
 	if err := e.Start("localhost:8080"); err != nil {

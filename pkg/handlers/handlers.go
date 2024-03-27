@@ -4,18 +4,32 @@ import (
 	"net/http"
 	"shoplist/pkg/models"
 	"shoplist/pkg/storage"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 type jsonResponse struct {
 	Message string            `json:"message"`
-	Content []models.ListItem `json:"string"`
+	Content []models.ListItem `json:"content"`
 }
 
 func GetAllHandler(db storage.Storage) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		items, _ := db.GetAll()
+		uid, err := strconv.Atoi(c.FormValue("user-id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "invalid uid provided",
+				Content: nil,
+			})
+		}
+		items, err := db.GetAll(uid)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: err.Error(),
+				Content: nil,
+			})
+		}
 		jsonPayload := jsonResponse{
 			Message: "successful",
 			Content: items,
@@ -29,8 +43,20 @@ func PostHandler(db storage.Storage) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		title := c.FormValue("title")
 		desc := c.FormValue("description")
-
-		id, _ := db.Insert(title, desc)
+		uid, err := strconv.Atoi(c.FormValue("user-id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "invalid uid provided",
+				Content: nil,
+			})
+		}
+		id, err := db.Insert(title, desc, uid)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: err.Error(),
+				Content: nil,
+			})
+		}
 		jsonPayload := jsonResponse{
 			Message: "successful",
 			Content: []models.ListItem{
@@ -38,6 +64,7 @@ func PostHandler(db storage.Storage) echo.HandlerFunc {
 					Id:          id,
 					Title:       title,
 					Description: desc,
+					UserId:      uid,
 				},
 			},
 		}

@@ -60,9 +60,25 @@ func (d *Database) Delete(id int) error {
 	return nil
 }
 
-func (d *Database) Update(data any, id, uid int) {
-	//TODO implement me
-	panic("implement me")
+func (d *Database) Update(data models.ListItem) (models.ListItem, error) {
+	query := `update list_item set title=$1, dsc=$2 where id = $3 and userid = $4 returning *`
+
+	m := models.ListItem{}
+
+	tx, err := d.Db.BeginTx(context.Background(), nil)
+	if err != nil {
+		return m, err
+	}
+	defer tx.Rollback()
+
+	row := tx.QueryRow(query, data.Title, data.Description, data.Id, data.UserId)
+
+	if err = row.Scan(&m.Id, &m.Title, &m.Description, &m.UserId); err != nil {
+		return m, err
+	}
+
+	err = tx.Commit()
+	return m, nil
 }
 
 func (d *Database) GetAll(uid int) ([]models.ListItem, error) {

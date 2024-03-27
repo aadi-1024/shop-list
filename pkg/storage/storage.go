@@ -6,7 +6,7 @@ import "shoplist/pkg/models"
 type Storage interface {
 	Insert(title, desc string, uid int) (int, error)
 	Delete(id int) error
-	Update(data any, id, uid int)
+	Update(data models.ListItem) (models.ListItem, error)
 	GetAll(uid int) ([]models.ListItem, error)
 	GetById(id int) (*models.ListItem, error)
 }

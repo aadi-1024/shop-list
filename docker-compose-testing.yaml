@@ -1,0 +1,12 @@
+services:
+  test-db:
+    image: postgres:alpine
+
+    #shared memory size
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test
+    ports:
+      - 5432:5432

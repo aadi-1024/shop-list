@@ -3,13 +3,13 @@ package memstore
 import "shoplist/pkg/models"
 
 type MemStore struct {
-	data map[int]models.ListItem
+	data  map[int]models.ListItem
 	curId int
 }
 
 func NewMemStore() *MemStore {
 	return &MemStore{
-		data: make(map[int]models.ListItem),
+		data:  make(map[int]models.ListItem),
 		curId: 0,
 	}
 }
@@ -17,8 +17,8 @@ func NewMemStore() *MemStore {
 func (m *MemStore) Insert(title, desc string) int {
 	m.curId++
 	m.data[m.curId] = models.ListItem{
-		Id: m.curId,
-		Title: title,
+		Id:          m.curId,
+		Title:       title,
 		Description: desc,
 	}
 	return m.curId

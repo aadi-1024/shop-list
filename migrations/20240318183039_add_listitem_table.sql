@@ -4,7 +4,9 @@ SELECT 'up SQL query';
 CREATE TABLE list_item (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255),
-    dsc VARCHAR(1024)
+    dsc VARCHAR(1024),
+    userid INT,
+    FOREIGN KEY (userid) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 )
 -- +goose StatementEnd
 

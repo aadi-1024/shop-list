@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"shoplist/pkg/memstore"
 
 	"github.com/labstack/echo/v4"
@@ -14,5 +15,7 @@ func main() {
 	e.Debug = true
 	SetupRouter(e)
 
-	e.Start("localhost:8080")
+	if err := e.Start("localhost:8080"); err != nil {
+		log.Println(err)
+	}
 }

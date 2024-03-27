@@ -9,13 +9,13 @@ import (
 )
 
 type jsonResponse struct {
-	Message string `json:"message"`
+	Message string            `json:"message"`
 	Content []models.ListItem `json:"string"`
 }
 
 func GetAllHandler(db storage.Storage) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		items := db.GetAll()
+		items, _ := db.GetAll()
 		jsonPayload := jsonResponse{
 			Message: "successful",
 			Content: items,
@@ -30,13 +30,13 @@ func PostHandler(db storage.Storage) echo.HandlerFunc {
 		title := c.FormValue("title")
 		desc := c.FormValue("description")
 
-		id := db.Insert(title, desc)
+		id, _ := db.Insert(title, desc)
 		jsonPayload := jsonResponse{
 			Message: "successful",
 			Content: []models.ListItem{
 				{
-					Id: id,
-					Title: title,
+					Id:          id,
+					Title:       title,
 					Description: desc,
 				},
 			},

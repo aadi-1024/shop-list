@@ -3,7 +3,7 @@
 SELECT 'up SQL query';
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(16),
+    username VARCHAR(16) UNIQUE,
     pass_hash VARCHAR(255)
 );
 -- +goose StatementEnd

@@ -43,8 +43,8 @@ func GetAllHandler(db storage.Storage) echo.HandlerFunc {
 func PostHandler(db storage.Storage) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		title := c.FormValue("title")
-		desc := c.FormValue("description")
-		uid, err := strconv.Atoi(c.FormValue("user-id"))
+		desc := c.FormValue("desc")
+		uid, err := strconv.Atoi(c.Request().Header.Get("user-id"))
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, jsonResponse{
 				Message: "invalid uid provided",
@@ -73,6 +73,96 @@ func PostHandler(db storage.Storage) echo.HandlerFunc {
 	}
 }
 
+func GetByIdHandler(db storage.Storage) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		//will always be valid because of jwt
+		uid, err := strconv.Atoi(c.Request().Header.Get("user-id"))
+		id, err := strconv.Atoi(c.FormValue("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "correct id expected",
+				Content: nil,
+			})
+		}
+
+		m, err := db.GetById(id, uid)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "error while fetching from db",
+				Content: nil,
+			})
+		}
+
+		return c.JSON(http.StatusOK, jsonResponse{
+			Message: "success",
+			Content: m,
+		})
+	}
+}
+
+func PutHandler(db storage.Storage) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		title := c.FormValue("title")
+		desc := c.FormValue("desc")
+		if title == "" {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "title can't be empty",
+				Content: nil,
+			})
+		}
+		//always valid because of jwt
+		uid, _ := strconv.Atoi(c.Request().Header.Get("user-id"))
+		id, err := strconv.Atoi(c.FormValue("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "correct id expected",
+				Content: nil,
+			})
+		}
+		m := models.ListItem{
+			Id:          id,
+			Title:       title,
+			Description: desc,
+			UserId:      uid,
+		}
+
+		ret, err := db.Update(m)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "error while fetching from db",
+				Content: nil,
+			})
+		}
+
+		return c.JSON(http.StatusOK, jsonResponse{
+			Message: "success",
+			Content: ret,
+		})
+	}
+}
+
+func DeleteHandler(db storage.Storage) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		//always valid due to JWT
+		uid, _ := strconv.Atoi(c.Request().Header.Get("user-id"))
+		id, err := strconv.Atoi(c.FormValue("id"))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "correct id expected",
+				Content: nil,
+			})
+		}
+		err = db.Delete(id, uid)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, jsonResponse{
+				Message: "error while querying db",
+				Content: nil,
+			})
+		}
+		return c.JSON(http.StatusOK, nil)
+	}
+}
+
 type Claims struct {
 	Userid int `json:"uid"`
 	jwt.RegisteredClaims
@@ -96,7 +186,7 @@ func LoginPostHandler(jwtSecret []byte) echo.HandlerFunc {
 		clm := &Claims{
 			uid,
 			jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(60 * time.Minute)),
 			},
 		}
 

@@ -39,8 +39,8 @@ func (d *Database) Insert(title, desc string, uid int) (int, error) {
 	return id, nil
 }
 
-func (d *Database) Delete(id int) error {
-	query := `delete from list_item where id = $1`
+func (d *Database) Delete(id, uid int) error {
+	query := `delete from list_item where id = $1 and userid = $2`
 
 	tx, err := d.Db.BeginTx(context.Background(), nil)
 	if err != nil {
@@ -48,7 +48,7 @@ func (d *Database) Delete(id int) error {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec(query, id)
+	_, err = tx.Exec(query, id, uid)
 	if err != nil {
 		return err
 	}
@@ -110,8 +110,8 @@ func (d *Database) GetAll(uid int) ([]models.ListItem, error) {
 	return data, err
 }
 
-func (d *Database) GetById(id int) (*models.ListItem, error) {
-	query := `select * from list_item where id = $1`
+func (d *Database) GetById(id, uid int) (*models.ListItem, error) {
+	query := `select * from list_item where id = $1 and userid = $2`
 
 	ret := &models.ListItem{}
 
@@ -121,7 +121,7 @@ func (d *Database) GetById(id int) (*models.ListItem, error) {
 	}
 	defer tx.Rollback()
 
-	row := tx.QueryRow(query, id)
+	row := tx.QueryRow(query, id, uid)
 
 	if err = row.Scan(&ret.Id, &ret.Title, &ret.Description, &ret.UserId); err != nil {
 		return nil, err

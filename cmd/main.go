@@ -17,16 +17,20 @@ func main() {
 	}
 	App.DataStore = db
 
-	secret := make([]byte, 64)
-	_, err = rand.Read(secret)
-	if err != nil {
-		log.Fatal(err)
-	}
-	App.jwt_secret = secret
-
 	e := echo.New()
 	e.Debug = true
 	e.HideBanner = true
+
+	if e.Debug {
+		App.jwt_secret = []byte("secret")
+	} else {
+		secret := make([]byte, 64)
+		_, err = rand.Read(secret)
+		if err != nil {
+			log.Fatal(err)
+		}
+		App.jwt_secret = secret
+	}
 	SetupRouter(e)
 
 	if err := e.Start("localhost:8080"); err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"log"
 	"shoplist/pkg/postgres"
 
@@ -15,6 +16,14 @@ func main() {
 		log.Fatal(err)
 	}
 	App.DataStore = db
+
+	secret := make([]byte, 64)
+	_, err = rand.Read(secret)
+	if err != nil {
+		log.Fatal(err)
+	}
+	App.jwt_secret = secret
+
 	e := echo.New()
 	e.Debug = true
 	e.HideBanner = true

@@ -68,3 +68,19 @@ func VerifyToken(jwtToken []byte) func(handlerFunc echo.HandlerFunc) echo.Handle
 		}
 	}
 }
+
+// CSRF Protection middleware
+//func CSRFVerification(next echo.HandlerFunc) echo.HandlerFunc {
+//	return func(c echo.Context) error {
+//		csrf := c.Get(middleware.DefaultCSRFConfig.ContextKey).(string)
+//
+//		if csrf != c.Request().Header.Get(echo.HeaderXCSRFToken) {
+//			return c.JSON(http.StatusUnauthorized, jsonRes{
+//				Message: "invalid csrf token",
+//				Content: "",
+//			})
+//		}
+//
+//		return next(c)
+//	}
+//}

@@ -9,9 +9,9 @@ $ ~ GOOSE_DRIVER=postgres GOOSE_DBSTRING="host=localhost user=postgres password=
 - JWT for authentication (with Middleware)
 - Basic CRUD functionality
 - Db migrations
+- User CRUD functionality
 
 ### Todo:
-- User CRUD functionality
 - CSRF
 - Generate OpenAPI spec
 - Automate build and deployment using Github Actions

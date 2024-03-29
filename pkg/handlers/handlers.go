@@ -3,6 +3,8 @@ package handlers
 import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"shoplist/pkg/models"
 	"shoplist/pkg/storage"
@@ -168,18 +170,18 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func LoginPostHandler(jwtSecret []byte) echo.HandlerFunc {
+func LoginPostHandler(jwtSecret []byte, db storage.Storage) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		//sample login data, integrate with db later
-		loginCreds := map[string]int{ //username userid, password is password
-			"user":  1,
-			"user1": 2,
-		}
+		////sample login data, integrate with db later
+		//loginCreds := map[string]int{ //username userid, password is password
+		//	"user":  1,
+		//	"user1": 2,
+		//}
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		uid, ok := loginCreds[username]
-		if !ok || password != "password" {
+		uid, err := db.VerifyPassHash(username, password)
+		if uid == -1 || err != nil {
 			return c.JSON(http.StatusUnauthorized, jsonResponse{Message: "Invalid Credentials"})
 		}
 
@@ -199,6 +201,29 @@ func LoginPostHandler(jwtSecret []byte) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, jsonResponse{
 			Message: "Authenticated",
 			Content: token,
+		})
+	}
+}
+
+func RegisterPostHandler(db storage.Storage) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		username := c.FormValue("username")
+		password := c.FormValue("password")
+
+		h, err := bcrypt.GenerateFromPassword([]byte(password), 0)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, jsonResponse{Message: "Something went wrong"})
+		}
+
+		err = db.AddUser(username, string(h))
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusUnauthorized, jsonResponse{Message: "Try a different username"})
+		}
+
+		return c.JSON(http.StatusOK, jsonResponse{
+			Message: "Registered",
+			Content: nil,
 		})
 	}
 }
